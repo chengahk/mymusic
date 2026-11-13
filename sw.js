@@ -1,0 +1,4 @@
+const APP='my-music-app-v4',FILES=['./','./index.html','./songs.json','./manifest.webmanifest'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(APP).then(c=>c.addAll(FILES)));self.skipWaiting()});
+self.addEventListener('activate',e=>{e.waitUntil((async()=>{const k=await caches.keys();await Promise.all(k.filter(x=>x!==APP&&x!=='my-music-audio-v2').map(x=>caches.delete(x)));await self.clients.claim()})())});
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin)return;if(u.pathname.toLowerCase().endsWith('.mp3')){e.respondWith((async()=>{const c=await caches.open('my-music-audio-v2');return await c.match(e.request)||fetch(e.request)})());return}e.respondWith((async()=>{const c=await caches.open(APP),v=await c.match(e.request);if(v)return v;try{const r=await fetch(e.request);if(r.ok)c.put(e.request,r.clone());return r}catch{return c.match('./')}})())});

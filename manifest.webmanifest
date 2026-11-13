@@ -1,0 +1,10 @@
+{
+  "name": "My Music Library",
+  "short_name": "My Music",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d1017",
+  "theme_color": "#10131b",
+  "description": "Personal music library with offline playback."
+}
