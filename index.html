@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827">
+<title>My Music Library</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#101827;color:#fff;font-family:Arial,sans-serif;min-height:100vh;padding-bottom:145px}
+header{padding:24px 7%;display:flex;justify-content:space-between;align-items:center;background:#172235}
+.logo{font-size:23px;font-weight:bold;color:#60a5fa}
+header span{color:#9ca3af;font-size:13px}
+main{max-width:900px;margin:auto;padding:35px 20px}
+.welcome{margin-bottom:30px}.welcome h1{font-size:32px;margin-bottom:10px}.welcome p{color:#9ca3af}
+.search{width:100%;padding:15px;border-radius:12px;border:1px solid #334155;background:#1e293b;color:#fff;font-size:15px;margin-bottom:30px}
+h2{margin-bottom:18px;font-size:20px}
+.song{display:flex;align-items:center;padding:15px;margin-bottom:10px;background:#1e293b;border-radius:12px;gap:15px;cursor:pointer}
+.song:hover{background:#334155}.cover{width:52px;height:52px;flex:none;border-radius:10px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;justify-content:center;align-items:center;font-size:23px}
+.song-info{flex:1;min-width:0}.song-info h3{font-size:15px;margin-bottom:5px;overflow-wrap:anywhere}.song-info p{color:#9ca3af;font-size:12px}
+.play-button{border:0;background:#2563eb;color:#fff;border-radius:50%;width:42px;height:42px;font-size:17px;cursor:pointer}
+.player{position:fixed;bottom:0;left:0;width:100%;background:#172235;padding:14px 20px;border-top:1px solid #334155;text-align:center}
+#nowPlaying{font-size:14px;margin-bottom:10px;color:#cbd5e1}
+.controls{display:flex;justify-content:center;align-items:center;gap:25px}
+.controls button{background:none;border:0;color:#fff;font-size:25px;cursor:pointer}
+.controls .main-play{background:#2563eb;border-radius:50%;width:46px;height:46px}
+audio{width:100%;max-width:600px;height:35px;margin-top:7px}
+.empty{color:#9ca3af;padding:20px}
+@media(max-width:500px){.welcome h1{font-size:26px}header{padding:20px}}
+</style>
+</head>
+<body>
+<header><div class="logo">♫ My Music</div><span>Personal Library</span></header>
+<main>
+<section class="welcome"><h1>Your music. Your world.</h1><p>Your personal music collection, wherever you go.</p></section>
+<input type="search" id="search" class="search" placeholder="Search your songs..." aria-label="Search songs">
+<h2>My Collection</h2>
+<div id="songList"></div>
+</main>
+<div class="player">
+<div id="nowPlaying">Select a song to begin</div>
+<div class="controls">
+<button aria-label="Previous song" onclick="previousSong()">⏮</button>
+<button class="main-play" aria-label="Play or pause" onclick="togglePlay()">▶</button>
+<button aria-label="Next song" onclick="nextSong()">⏭</button>
+</div>
+<audio id="audio" controls preload="none"></audio>
+</div>
+<script>
+/* Add or edit song entries here. The filename must match the file in music/. */
+const songs = [
+  {title:"Song One", artist:"My Music", file:"music/song1.mp3"},
+  {title:"Song Two", artist:"My Music", file:"music/song2.mp3"},
+  {title:"Song Three", artist:"My Music", file:"music/song3.mp3"}
+];
+const audio=document.getElementById("audio");
+const songList=document.getElementById("songList");
+let currentSong=0;
+function displaySongs(list=songs){
+  songList.innerHTML="";
+  if(!list.length){songList.innerHTML='<p class="empty">No songs found.</p>';return;}
+  list.forEach(song=>{
+    const index=songs.indexOf(song);
+    const item=document.createElement("div");
+    item.className="song";
+    item.innerHTML='<div class="cover">♫</div><div class="song-info"><h3></h3><p></p></div><button class="play-button" aria-label="Play song">▶</button>';
+    item.querySelector("h3").textContent=song.title;
+    item.querySelector("p").textContent=song.artist;
+    item.querySelector("button").addEventListener("click",e=>{e.stopPropagation();playSong(index);});
+    item.addEventListener("click",()=>playSong(index));
+    songList.appendChild(item);
+  });
+}
+function playSong(index){
+  if(!songs.length)return;
+  currentSong=index;
+  audio.src=songs[index].file;
+  document.getElementById("nowPlaying").textContent="Now Playing: "+songs[index].title;
+  audio.play().catch(()=>{document.getElementById("nowPlaying").textContent="Could not play "+songs[index].title+" — check the MP3 filename.";});
+}
+function togglePlay(){
+  if(!audio.src){playSong(0);return;}
+  if(audio.paused)audio.play();else audio.pause();
+}
+function nextSong(){currentSong=(currentSong+1)%songs.length;playSong(currentSong);}
+function previousSong(){currentSong=(currentSong-1+songs.length)%songs.length;playSong(currentSong);}
+audio.addEventListener("ended",nextSong);
+document.getElementById("search").addEventListener("input",function(){
+  const q=this.value.toLowerCase();
+  displaySongs(songs.filter(song=>song.title.toLowerCase().includes(q)||song.artist.toLowerCase().includes(q)));
+});
+displaySongs();
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(console.error));
+}
+</script>
+</body>
+</html>
