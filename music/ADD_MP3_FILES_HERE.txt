@@ -1,0 +1,1 @@
+Copy your MP3 files into this music folder. Then edit the songs list in index.html so each title and file path matches your MP3 filenames. The starter site currently has example entries for song1.mp3, song2.mp3 and song3.mp3.
